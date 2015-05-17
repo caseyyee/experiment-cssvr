@@ -1,0 +1,19 @@
+{
+  "name": "css-vr-experiments",
+  "version": "0.0.1",
+  "description": "CSS VR experiments",
+  "scripts": {
+    "start": "http-server ./"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MozVR/cssvr-experiments"
+  },
+  "license": "MPL",
+  "engines": {
+    "node": "0.12.x"
+  },
+  "devDependencies": {
+    "http-server": "^0.7.4"
+  }
+}

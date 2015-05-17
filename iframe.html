@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>CSS VR Experiments</title>
+  <meta charset="utf-8">
+  <meta name="viewmode" content="projection=stereo">
+  <style>
+  iframe {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+  }
+
+  #fs {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+  }
+  </style>
+  <script>
+  var vrDevices = {};
+
+  function start() {
+    var fsButton = document.querySelector('#fs');
+    var container = document.querySelector('#container');
+    
+    fsButton.addEventListener('click', function() {
+      container.mozRequestFullScreen({ vrDisplay: vrDevices.headset }) ;
+    })
+  }
+
+  navigator.getVRDevices().then(function(devices) {
+    vrDevices.headset = devices[0];
+    vrDevices.position = devices[1];
+    
+    start();
+  });
+  </script>
+</head>
+<body>
+	<div id="container">
+    <iframe src="20150505-03/space-barrel.html"></iframe>
+  </div>
+
+  <button id="fs">Fullscreen VR</button>
+  
+</body>
+</html>
