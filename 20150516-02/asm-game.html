@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Video Playe</title>
+  <title>ASM DOS VR</title>
   <meta charset="utf-8">
 
   <link href='http://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
@@ -43,7 +43,6 @@
 
       cssCamera.style.transform = cssCameraPositionTransform + " " + cssOrientationMatrix;
 
-      hudUpdatePosition();
     }
 
     function vrDeviceCallback(vrdevs) {
@@ -130,7 +129,7 @@
     body {
       overflow: hidden;
       font-family: 'Montserrat', sans-serif;
-      background: black;
+      background: #06274B;
     }
 
     /* Container is nothing special; it's the element that is made full screen.
@@ -148,6 +147,7 @@
       transform-style: preserve-3d;
       transform: translate(50%, 50%) translate3d(0, 0, -4000px);
       perspective: 1000px;
+      background: #06274B;
     }
 
     #fsbutton:-moz-full-screen {
@@ -190,10 +190,10 @@
 
     }
 
-    #video {
-      width: 14000px;
-      height: 7875px;
-      transform: translate(-50%, -50%) rotateY(0deg) translate3d(0, 0, -9000px);
+    #game {
+      width: 12000px;
+      height: 8228px;
+      transform: translate(-50%, -50%) rotateY(0deg) translate3d(0, 0, -7000px);
     }
 
     #controls {
@@ -248,12 +248,9 @@
     <div id="camera" class="threed">
       <div id="world" class="threed">
 
-        <video id="video" class="threed" autoplay controls loop>
-          <source src="veig-idproject.mp4" type="video/mp4">
-        </video> 
+        <iframe src="https://archive.org/embed/msdos_Super_Street_Fighter_II_1996" width="12000" height="8228" webkitallowfullscreen mozallowfullscreen allowfullscreen class="threed" id="game"></iframe>
 
-        <div id="credits" class="threed">
-
+        <!-- <div id="credits" class="threed">
           <h1>VEIG ID PROJECT<br>'VEIG TYPE'</h1>
           <li>
             <ul>Client: Veig.tv</ul>
@@ -264,10 +261,7 @@
             <ul>Full Story</ul>
             <ul><a href="bit.ly/19xM9U7">bit.ly/19xM9U7</a></ul>
           </li>
-
-        </div>
-
-        <div id="controls" class="threed">Play / Pause / Stop</div>
+        </div> -->
 
 
       </div>
