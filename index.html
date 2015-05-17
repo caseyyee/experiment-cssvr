@@ -3,14 +3,78 @@
 <head>
   <title>CSS VR Experiments</title>
   <meta charset="utf-8">
+  <link rel="stylesheet" href="//code.cdn.mozilla.net/fonts/fira.css">
+  <link href='http://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
 </head>
 <body>
+	
+	<style type="text/css">
+
+		body {
+			background: black;
+			font-family: 'Montserrat', sans-serif;
+			color: white;
+			margin: 0;
+			padding: 3rem;
+		}
+
+		h1 {
+			padding-bottom: 3rem;
+		}
+
+		ul, li {
+			list-style: none;
+			margin: 0;
+			padding: 0;
+			line-height: 2rem;
+		}
+
+		.note, .note a, .date {
+			color: rgba(255,255,255,0.4);
+			font-family: 'Fira Mono', sans-serif;
+		}
+
+		.note {
+			padding-bottom: 1rem;
+			border-bottom: 1px dashed rgba(255,255,255,0.25);
+		}
+
+		.note a:hover {
+			color: white;
+		}
+
+		.date {
+			padding-right: 4rem;
+		}
+
+		a {
+			color: white;
+			text-decoration: none;
+			border-bottom: 1px solid rgba(255,255,255,0.6);
+		}
+
+		li a:hover {
+			background-color: #E92958;
+			border-bottom: 1px solid #E92958;
+		}
+
+		#logo {
+			position: absolute;
+			bottom: 3rem;
+			left: 3rem;
+			width: 6rem;
+		}
+
+	</style>
+
 	<h1>CSS VR Experiments</h1>
+	<p class="note"><a href="https://github.com/mozvr/cssvr-experiments">View on GitHub</a>. Requires Firefox Nightly with CSS VR support.</p>
 	<li>
-		<ul><a href="/20150505/bluebox.html">20150505/bluebox.html</a></ul>
-		<ul><a href="/20150505-02/cubemap.html">20150505-02/cubemap.html</a></ul>
-		<ul><a href="/20150505-03/space-barrel.html">20150505-03/space-barrel.html</a></ul>
-		<!-- <ul><a href="/20150515/index.html">20150515</a></ul> -->
+		<ul><span class="date">20150505</span><a href="/20150505/bluebox.html">Blue Box</a></ul>
+		<ul><span class="date">20150505</span><a href="/20150505-02/cubemap.html">"Abandoned" Cube Map</a></ul>
+		<ul><span class="date">20150505</span><a href="/20150505-03/space-barrel.html">Space Barrel</a></ul>
+		<ul><span class="date">20150516</span><a href="/20150516/videoplayer.html">Video Player</a></ul>
 	</li>
+	<img src="assets/logo-mozilla-white.svg" id="logo" alt="Mozilla">
 </body>
 </html>

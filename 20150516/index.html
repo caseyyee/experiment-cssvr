@@ -78,11 +78,11 @@
 
 
 
-
     /*
     Make a barrel
     */
 
+    /*
     var DRUM_TEXTURE = "http://keithclark.co.uk/labs/css-fps/drum2.png";
 
     // Assembiles are for grouping faces and other assembiles
@@ -123,95 +123,13 @@
         barrel.appendChild(createFace(100, 100, 0, 98, 0, -Math.PI / 2, 0, 0, DRUM_TEXTURE, 0, 100));
         return barrel;
     }
+    */
 
     
 
 
 
-    /*
-    Set up HUD
-    */
-
-    var HUD = {
-      elements: [
-        { image: "images/cnn.png", url: "http://www.cnn.com/" },
-        { image: "images/gt.png", url: "http://www.gametrailers.com/" },
-        { image: "images/time.jpg", url: "http://www.time.com/" },
-        { image: "images/food.jpg", url: "http://www.food.com/" },
-      ],
-      visible: false,
-      currentElement: 0,
-    };
-
-    function hudInitialize() {
-      // starts out as hidden
-      $("#hud").fadeOut();
-      $("#hud").empty();
-      for (var i = 0; i < HUD.elements.length; ++i) {
-        var e = HUD.elements[i];
-        $("#hud").append('<div class="hudelement"><img width=128 height=128 src="' + e.image + '"></div>');
-      }
-
-      // this is a bit of a hack
-      HUD.width = HUD.elements.length * (128 + 12);
-      $("#hud").width(HUD.width + "px");
-      
-      hudMoveSelection(0);
-    }
-
-    function hudMoveSelection(direction) {
-      var numElements = HUD.elements.length;
-      var newElement = HUD.currentElement + direction;
-      if (newElement < 0)
-        newElement = numElements + newElement;
-      else if (newElement >= numElements)
-        newElement = newElement % numElements;
-
-      $("#hud > div").removeClass("hud-selected");
-      $("#hud > div:nth-child(" + (newElement+1) + ")").addClass("hud-selected");
-      HUD.currentElement = newElement;
-    }
-
-    function hudUpdatePosition() {
-      var cssString = "translate(-" + (HUD.width/2) + "px, -70px) ";
-      if (currentOrientation) {
-        // we need to invert the orientation quat; we don't have a quaternion class here, so just do it by hand
-        // For a proper hud position, we'd only want to take into account rotation about Y, and ignore pitch
-        // and roll -- we want the horizon to stay constant.  But we don't have an easy way of converting
-        // to euler angles here, so I don't bother for this demo.
-        var x = -currentOrientation.x, y = -currentOrientation.y, z = -currentOrientation.z, w = currentOrientation.w;
-        var ql = Math.sqrt(x*x + y*y + z*z + w*w);
-        if (ql) {
-          ql = 1.0 / ql;
-          x *= ql; y *= ql; z *= ql; w *= ql;
-          cssString += cssMatrixFromOrientation({ x: x, y: y, z: z, w: w}) + " ";
-        }
-      }
-      cssString += "translate3d(0, 0, -200px)";
-      $("#hud").css("transform", cssString);
-    }
-
-    function hudSelect() {
-      console.log("hudSelect", HUD.visible);
-      if (!HUD.visible)
-        return;
-      var e = HUD.elements[HUD.currentElement];
-
-      $("#ifr1").attr("src", e.url);
-      $("#hud").fadeOut();
-      HUD.visible = false;
-    }
-
-    function hudToggle() {
-      if (HUD.visible) {
-        $("#hud").fadeOut(0.2);
-      } else {
-        $("#hud").fadeIn();
-      }
-
-      HUD.visible = !HUD.visible;
-    }
-
+   
     function goFullscreen() {
       vrSensor.resetSensor();
       cssContainer.mozRequestFullScreen({ vrDisplay: vrHMD });
@@ -226,9 +144,6 @@
           case 'z':
     	vrSensor.resetSensor();
     	break;
-          case ' ':
-    	hudToggle();
-    	break;
           default:
     	return;
         }
@@ -236,23 +151,6 @@
         event.preventDefault();
         event.stopPropagation();
         return;
-      }
-
-      switch (event.keyCode) {
-        case KeyEvent.DOM_VK_LEFT:
-          hudMoveSelection(-1);
-          break;
-        case KeyEvent.DOM_VK_RIGHT:
-          hudMoveSelection(1);
-          break;
-        case KeyEvent.DOM_VK_TAB:
-          hudToggle();
-          break;
-        case KeyEvent.DOM_VK_RETURN:
-          hudSelect();
-          break;
-        default:
-          return;
       }
 
       event.preventDefault();
@@ -263,8 +161,7 @@
       cssCamera = document.getElementById("camera");
       cssContainer = document.getElementById("container");
 
-      hudInitialize();
-      document.getElementById("barrel").appendChild(createBarrel());
+      // document.getElementById("barrel").appendChild(createBarrel());
       
       if (navigator.getVRDevices)
         navigator.getVRDevices().then(vrDeviceCallback);
@@ -286,6 +183,7 @@
 
     body {
       overflow: hidden;
+      font-family: 'Montserrat', sans-serif;
     }
 
     /* Container is nothing special; it's the element that is made full screen.
@@ -295,6 +193,7 @@
      * entering fullscreen.  There's a -moz-full-screen selector that's useful for this.
      */
     #container {
+      background: rgb(10,10,10);
     }
 
     #container:not(:-moz-full-screen) {
@@ -339,87 +238,69 @@
       /* the transform itself is set programatically, since it needs to take into account the HMD orientation */
     }
 
+    #world {
+      transform: translate3d(0, 0, 0);
+
+    }
+
     .pane {
       width: 1800px;
       height: 1800px;
       overflow: hidden;
-      background-size: 100%;
-      /*border: 5px dashed rgba( 255, 255, 255, 0.3 );*/
-      /*
-      background-image: linear-gradient(white 2px, transparent 2px),
-      linear-gradient(90deg, white 2px, transparent 2px),
-      linear-gradient(rgba(255,255,255,.3) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,.3) 1px, transparent 1px);
-      background-size:100px 100px, 100px 100px, 20px 20px, 20px 20px;
-      background-position:-2px -2px, -2px -2px, -1px -1px, -1px -1px
-      */
+      background: rgb(40,40,40);
     }
 
     #front {
       transform: translate(-900px, -900px) rotateY(0deg) translate3d(0, 0, -900px);
-      background-image: url('gliese-front.jpg'); 
+      /*background-image: url('island-front.png'); */
     }
 
     #back {
       transform: translate(-900px, -900px) rotateY(180deg) translate3d(0, 0, -900px);
-      background-image: url('gliese-back.jpg');
+      /*background-image: url('island-back.png');*/
     }
 
     #left {
       transform: translate(-900px, -900px) rotateY(90deg) translate3d(0, 0, -900px);
-      background-image: url('gliese-left.jpg');
+      /*background-image: url('island-left.png');*/
     }
 
     #right {
       transform: translate(-900px, -900px) rotateY(-90deg) translate3d(0, 0, -900px);
-      background-image: url('gliese-right.jpg');
+      /*background-image: url('island-right.png');*/
     }
 
     #top {
       transform: translate(-900px, -900px) rotateX(-90deg) translate3d(0, 0, -900px);
-      background-image: url('gliese-top.jpg');
+      /*background-image: url('island-top.png');*/
     }
 
     #bottom {
-      background-color: #143D5C;
       transform: translate(-900px, -900px) rotateX(90deg) translate3d(0, 0, -900px);
-      background-image: url('gliese-bottom.jpg');
+      /*background-image: url('island-bottom.png');*/
     }
 
 
-    #world {
-      transform: translate3d(0, 0, 0);
+
+    #video {
+      width: 14000px;
+      height: 7875px;
+      transform: translate(-50%, -50%) rotateY(0deg) translate3d(0, 0, -9000px);
     }
 
-    #text1 {
+    #controls {
       color: white;
-      font-family: 'Montserrat', sans-serif;
-      font-size: 60px;
+      font-size: 80px;
       line-height: 36px;
       font-weight: 500;
+      padding: 3rem;
+      text-align: center;
       text-transform: uppercase;
-      transform: translate(-10px, -15px) translate3d(100px, 0px, 0px);
+      transform: translate(0px, 50px) translate3d(0px, 0px, -2000px);
       white-space: nowrap;
+      background-color: #000000;
     }
 
-    #text1 bold {
-      font-weight: 700;
-    }
-
-    #barrel {
-      transform: translate3d(0, 0, -500px);
-    }
-
-    #assembly {
-      transform: rotateX(0deg) rotateY(0deg) rotateZ(0deg);
-      animation: spin 10s linear infinite;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotateX(360deg) rotateY(360deg) rotateZ(360deg);
-      }
-    }
 
     /*
     @keyframes spin {
@@ -430,16 +311,6 @@
 
     #anim1 {
       animation: spin 5s linear infinite;
-    }
-    
-    #text1 {
-      color: white;
-      font-family: 'Montserrat', sans-serif;
-      font-size: 120px;
-      line-height: 100px;
-      font-weight: 700;
-      text-transform: uppercase;
-      transform: translate(-10px, -15px) translate3d(-250px, 0, -480px);
     }
 
     #overlay {
@@ -500,26 +371,34 @@
     }
     */
 
-
-    /*
-    #hudposition {
-      transform: translate3d(0, 0, -200px);
+    #credits {
+      transform: translate(-600px, 400px) translate3d(0px, 0px, -1200px);
+      background-color: rgba(0,0,0,0.8);
+      padding: 1rem 2rem;
+      font-family: Montserrat;
+      line-height: 2.5rem;
+      /*border-bottom: 2px solid rgba(255,255,255,0.7);*/
     }
 
-    #hud {
-      background: rgba(0, 0, 0, 0.5);
+    #credits h1 {
+      color: white;
+      font-size: 2rem;
+      text-transform: uppercase;
     }
 
-    .hudelement {
-      display: inline-block;
-      padding: 2px;
-      border: 4px solid transparent;
+    #credits ul, li {
+      font-size: 1.75rem;
+      white-space: nowrap;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      color: rgba(255,255,255,0.5);
     }
 
-    .hud-selected {
-      border: 4px solid yellow;
+    #credits a {
+      color: white;
+      text-decoration: none;
     }
-    */
 
   </style>
 
@@ -531,25 +410,35 @@
     <div id="camera" class="threed">
       <div id="world" class="threed">
 	
-        <div id="barrel" class="threed">
-          <div id="assembly" class="threed">
-            <div id="text1" class="threed">
-              3D Model
-              <br>
-              ———
-              <br>
-              <b>Space Barrel</b>
-            </div>
-          </div>
-        </div>
-
-
+        <!--
         <div id="front" class="threed pane"></div>
         <div id="back" class="threed pane"></div>
       	<div id="left" class="threed pane"></div>
       	<div id="right" class="threed pane"></div>
         <div id="top" class="threed pane"></div>
         <div id="bottom" class="threed pane"></div>
+        -->
+
+        <video id="video" class="threed" autoplay controls loop>
+          <source src="veig-idproject.mp4" type="video/mp4">
+        </video> 
+
+        <div id="credits" class="threed">
+
+          <h1>VEIG ID PROJECT<br>'VEIG TYPE'</h1>
+          <li>
+            <ul>Client: Veig.tv</ul>
+            <ul>Year: 2013</ul>
+            <ul>Type: Full HD</ul>
+            <ul>Music: Warrior Concerto<br>(The Glitch Mob)</ul>
+            <ul>-</ul>
+            <ul>Full Story</ul>
+            <ul><a href="bit.ly/19xM9U7">bit.ly/19xM9U7</a></ul>
+          </li>
+
+        </div>
+
+        <div id="controls" class="threed">Play / Pause / Stop</div>
 
         <!--
         <div id="overlay" class="threed"></div>
@@ -575,11 +464,8 @@
       	</div>
         -->
 
-      	<div id="hudposition" class="threed"><div id="hud" class="threed"></div></div>
-
       </div>
 
-      <div id="bottom" class="threed"></div>
     </div>
   </div>
 
