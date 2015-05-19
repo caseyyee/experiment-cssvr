@@ -38,12 +38,19 @@
 
       var state = vrSensor.getState();
       currentOrientation = state.orientation;
-      var cssOrientationMatrix = cssMatrixFromOrientation(currentOrientation);
+      var cssStateMatrix = cssMatrixFromOrientation(currentOrientation);
 
-      cssCamera.style.transform = cssCameraPositionTransform + " " + cssOrientationMatrix;
+      if (state.position) {
+        var p = state.position;
+        var tx = " translate3d(" + (-p.x*100.0) + "cm, " + (p.y*100.0) + "cm, " + (-p.z*100.0) + "cm) ";
+        cssStateMatrix += tx;
+      }
+        
+      cssCamera.style.transform = cssCameraPositionTransform + " " + cssStateMatrix;
 
       hudUpdatePosition();
     }
+
 
     function vrDeviceCallback(vrdevs) {
       for (var i = 0; i < vrdevs.length; ++i) {
