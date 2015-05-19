@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Cube Map</title>
+  <meta charset="utf-8">
+
+  <link href='http://fonts.googleapis.com/css?family=Montserrat:400,700' rel='stylesheet' type='text/css'>
+  <script type="text/javascript" src="lib/jquery-2.1.0.js"></script>
+  <script type="text/javascript" src="lib/prefixfree.min.js"></script>
+  <script type="text/javascript" src="css-vr-utils.js"></script>
+  <script type="text/javascript">
+
+    // Our VR devices -- a HMD, and its associated orientation/position sensor
+    var vrHMD, vrSensor;
+
+    // the <div> element that we can make fullscreen
+    var cssContainer;
+
+    // the <div> element that will serve as our camera, moving the
+    // rest of the scene around
+    var cssCamera;
+
+    // the camera's position, as a css transform string.  For right now,
+    // we want it just in the middle.
+    var cssCameraPositionTransform = "";
+
+    // the current saved orientation, as a quaternion
+    var currentOrientation;
+
+    function frameCallback() {
+      // This is needed to update the CSS orientation/position from the HMD's orientation/position.
+      // In the future, we may have CSS transform function to do this automatically -- for example:
+      //    transform: vrOrientation() vrPosition()
+      // Where those would turn into full 4x4 matrices based on the current fullscreen HMD's orientation
+      // and position.
+      // XXX we should introduce quaternions to CSS as well
+
+      window.requestAnimationFrame(frameCallback);
+
+      var state = vrSensor.getState();
+      currentOrientation = state.orientation;
+      var cssOrientationMatrix = cssMatrixFromOrientation(currentOrientation);
+
+      cssCamera.style.transform = cssCameraPositionTransform + " " + cssOrientationMatrix;
+
+      hudUpdatePosition();
+    }
+
+    function vrDeviceCallback(vrdevs) {
+      for (var i = 0; i < vrdevs.length; ++i) {
+        if (vrdevs[i] instanceof HMDVRDevice) {
+          vrHMD = vrdevs[i];
+          break;
+        }
+      }
+
+      if (!vrHMD)
+        return;
+
+      // Then, find that HMD's position sensor
+      for (var i = 0; i < vrdevs.length; ++i) {
+        if (vrdevs[i] instanceof PositionSensorVRDevice &&
+            vrdevs[i].hardwareUnitId == vrHMD.hardwareUnitId)
+        {
+          vrSensor = vrdevs[i];
+          break;
+        }
+      }
+
+      if (!vrSensor) {
+        alert("Found a HMD, but didn't find its orientation sensor?");
+      }
+
+      // kick off rendering
+      requestAnimationFrame(frameCallback);
+    }
+
+
+
+
+    /*
+    Make a barrel
+    */
+
+    /*
+    var DRUM_TEXTURE = "http://keithclark.co.uk/labs/css-fps/drum2.png";
+
+    // Assembiles are for grouping faces and other assembiles
+    function createAssembly() {
+        return document.getElementById("assembly");
+    }
+
+    function createFace(w, h, x, y, z, rx, ry, rz, tsrc, tx, ty) {
+        var face = document.createElement("div");
+        face.className = "threed face";
+        face.style.cssText = PrefixFree.prefixCSS(
+            "background: url(" + tsrc + ") -" + tx.toFixed(2) + "px " + ty.toFixed(2) + "px;" +
+            "width:" + w.toFixed(2) + "px;" +
+            "height:" + h.toFixed(2) + "px;" +
+            "margin-top: -" + (h / 2).toFixed(2) + "px;" +
+            "margin-left: -" + (w / 2).toFixed(2) + "px;" +
+            "transform: translate3d(" + x.toFixed(2) + "px," + y.toFixed(2) + "px," + z.toFixed(2) + "px)" +
+            "rotateX(" + rx.toFixed(2) + "rad) rotateY(" + ry.toFixed(2) + "rad) rotateY(" + rz.toFixed(2) + "rad);");
+        return face;
+    }
+
+    function createTube(dia, height, sides, texture) {
+        var tube = createAssembly();
+        var sideAngle = (Math.PI / sides) * 2;
+        var sideLen = dia * Math.tan(Math.PI/sides);
+        for (var c = 0; c < sides; c++) {
+            var x = Math.sin(sideAngle * c) * dia / 2;
+            var z = Math.cos(sideAngle * c) * dia / 2;
+            var ry = Math.atan2(x, z);
+            tube.appendChild(createFace(sideLen + 1, height, x, 0, z, 0, ry, 0, texture, sideLen * c, 0));
+        }
+        return tube;
+    }
+
+    function createBarrel() {
+        var barrel = createTube(100, 196, 20, DRUM_TEXTURE);
+        barrel.appendChild(createFace(100, 100, 0, -98, 0, Math.PI / 2, 0, 0, DRUM_TEXTURE, 0, 100));
+        barrel.appendChild(createFace(100, 100, 0, 98, 0, -Math.PI / 2, 0, 0, DRUM_TEXTURE, 0, 100));
+        return barrel;
+    }
+    */
+
+    
+
+
+
+   
+    function goFullscreen() {
+      vrSensor.resetSensor();
+      cssContainer.mozRequestFullScreen({ vrDisplay: vrHMD });
+    }
+
+    function onkey(event) {
+      if (event.charCode) {
+        switch (String.fromCharCode(event.charCode)) {
+          case 'f':
+    	goFullscreen();
+    	break;
+          case 'z':
+    	vrSensor.resetSensor();
+    	break;
+          default:
+    	return;
+        }
+        
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    function init() {
+      cssCamera = document.getElementById("camera");
+      cssContainer = document.getElementById("container");
+
+      // document.getElementById("barrel").appendChild(createBarrel());
+      
+      if (navigator.getVRDevices)
+        navigator.getVRDevices().then(vrDeviceCallback);
+    }
+
+
+    $(document).keypress(onkey);
+    $(document).ready(init);
+
+  </script>
+</head>
+
+
+
+<body>
+
+  <style type="text/css">
+    /* keeping style block in body to make it easier to see the relationship between elements */
+
+    body {
+      overflow: hidden;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    /* Container is nothing special; it's the element that is made full screen.
+     * When non-fullscreen, you can add transforms to this element to make the scene
+     * make sense in 2D (instead of being centered around the top left).  That transform
+     * will cascade down to children when fullscreen though, so make sure to remove it when
+     * entering fullscreen.  There's a -moz-full-screen selector that's useful for this.
+     */
+    #container {
+      background: rgb(10,10,10);
+    }
+
+    #container:not(:-moz-full-screen) {
+      /* this is just to move the scene to the visible area when not in fullscreen VR */
+      transform-style: preserve-3d;
+      transform: translate(50%, 50%) translate3d(0, 0, -4000px);
+      perspective: 1000px;
+    }
+
+    #fsbutton:-moz-full-screen {
+      display: none;
+    }
+
+    /* All threed-class elements have preserve-3d; preserve-3d is NOT inherited.  (There's an open
+     * discussion on w3-style about adding a new transform-style that is like preserve-3d but is
+     * inherited.)
+     *
+     * position: absolute; and 0,0 is also set because we'll position these elements fully using
+     * 3D transforms.  Their CSS position is irrelevant for us.  Without this, their CSS position
+     * will come into play as well as their transform.
+     *
+     * When in fullscreen VR, the 0,0,0 position is at the center of the viewport and not the top
+     * left.
+     *
+     * We don't modify the original transform-origin here (50% 50% 0), because that can be useful
+     * for moving elements around by their center point.  But it could also be set to 0,0,0 to
+     * make it completely clear exactly where/how 3D objects are moving.
+     */
+    .threed {
+      transform-style: preserve-3d;
+      position: absolute;
+      top: 0; left: 0;
+    }
+
+    /* The camera div just serves as a way to set up a modelview transform for the entire rest of the
+     * scene.  The transform that's set on it needs to be the *inverse* of where you want the camera
+     * to be; that is, if you want the camera to be at (0, 0, 500), then the transform needs to be
+     * set to (0, 0, -500).  The transform-origin is set here because we want to go from the origin
+     */
+    #camera {
+      transform-origin: 0 0 0;
+      /* the transform itself is set programatically, since it needs to take into account the HMD orientation */
+    }
+
+    #world {
+      transform: translate3d(0, 0, 0);
+
+    }
+
+    .pane {
+      width: 1800px;
+      height: 1800px;
+      overflow: hidden;
+      background: rgb(40,40,40);
+    }
+
+    #front {
+      transform: translate(-900px, -900px) rotateY(0deg) translate3d(0, 0, -900px);
+      /*background-image: url('island-front.png'); */
+    }
+
+    #back {
+      transform: translate(-900px, -900px) rotateY(180deg) translate3d(0, 0, -900px);
+      /*background-image: url('island-back.png');*/
+    }
+
+    #left {
+      transform: translate(-900px, -900px) rotateY(90deg) translate3d(0, 0, -900px);
+      /*background-image: url('island-left.png');*/
+    }
+
+    #right {
+      transform: translate(-900px, -900px) rotateY(-90deg) translate3d(0, 0, -900px);
+      /*background-image: url('island-right.png');*/
+    }
+
+    #top {
+      transform: translate(-900px, -900px) rotateX(-90deg) translate3d(0, 0, -900px);
+      /*background-image: url('island-top.png');*/
+    }
+
+    #bottom {
+      transform: translate(-900px, -900px) rotateX(90deg) translate3d(0, 0, -900px);
+      /*background-image: url('island-bottom.png');*/
+    }
+
+
+
+    #video {
+      width: 14000px;
+      height: 7875px;
+      transform: translate(-50%, -50%) rotateY(0deg) translate3d(0, 0, -9000px);
+    }
+
+    #controls {
+      color: white;
+      font-size: 80px;
+      line-height: 36px;
+      font-weight: 500;
+      padding: 3rem;
+      text-align: center;
+      text-transform: uppercase;
+      transform: translate(0px, 50px) translate3d(0px, 0px, -2000px);
+      white-space: nowrap;
+      background-color: #000000;
+    }
+
+
+    /*
+    @keyframes spin {
+      0% { transform: translateY(200px) rotateY(360deg); }
+      50% { transform: translateY(200px) rotateY(180deg); }
+      100% { transform: translateY(200px) rotateY(0deg); }
+    }
+
+    #anim1 {
+      animation: spin 5s linear infinite;
+    }
+
+    #overlay {
+      width: 300px;
+      height: 300px;
+      background: rgba( 255, 191, 0, 0.5 );
+      border-radius: 30px;
+      transform: translate(-150px, -150px) translate3d(0, 0, -400px); 
+    }
+
+    #logo {
+      width: 200px;
+      height: 100px;
+      transform: translate(-100px, -50px) translate3d(-160px, -100px, -300px); 
+    }
+
+    .loading {
+      width: 200px;
+      height: 200px;
+      font-size: 10px;
+      transform: translate3d(0px, 100px, -350px);
+    }
+
+    .loading > div {
+      background-color: rgba( 0, 0, 0, 0.5 );
+      height: 100%;
+      width: 30px;
+      
+      animation: stretchdelay 1.2s infinite ease-in-out;
+    }
+
+    .loading .rect2 {
+      margin-left: 40px;
+      animation-delay: -1.1s;
+    }
+
+    .loading .rect3 {
+      margin-left: 80px;
+      animation-delay: -1.0s;
+    }
+
+    .loading .rect4 {
+      margin-left: 120px;
+      animation-delay: -0.9s;
+    }
+
+    .loading .rect5 {
+      margin-left: 160px;
+      animation-delay: -0.8s;
+    }
+
+    @keyframes stretchdelay {
+      0%, 40%, 100% { 
+        transform: scaleY(0.4);
+      }  20% { 
+        transform: scaleY(1.0);
+      }
+    }
+    */
+
+    #credits {
+      transform: translate(-600px, 400px) translate3d(0px, 0px, -1200px);
+      background-color: rgba(0,0,0,0.8);
+      padding: 1rem 2rem;
+      font-family: Montserrat;
+      line-height: 2.5rem;
+      /*border-bottom: 2px solid rgba(255,255,255,0.7);*/
+    }
+
+    #credits h1 {
+      color: white;
+      font-size: 2rem;
+      text-transform: uppercase;
+    }
+
+    #credits ul, li {
+      font-size: 1.75rem;
+      white-space: nowrap;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      color: rgba(255,255,255,0.5);
+    }
+
+    #credits a {
+      color: white;
+      text-decoration: none;
+    }
+
+  </style>
+
+  <!-- this is a containing element that will be made fullscreen -->
+  <div id="container" class="container">
+    <!-- This is an inner element that will serve as a camera, moving its children around in the scene.
+         This and all its children will have transform-style: preserve-3d set via the class, as well as
+         transform-origin set to 0,0 -->
+    <div id="camera" class="threed">
+      <div id="world" class="threed">
+	
+        <!--
+        <div id="front" class="threed pane"></div>
+        <div id="back" class="threed pane"></div>
+      	<div id="left" class="threed pane"></div>
+      	<div id="right" class="threed pane"></div>
+        <div id="top" class="threed pane"></div>
+        <div id="bottom" class="threed pane"></div>
+        -->
+
+        <video id="video" class="threed" autoplay controls loop>
+          <source src="veig-idproject.mp4" type="video/mp4">
+        </video> 
+
+        <div id="credits" class="threed">
+
+          <h1>VEIG ID PROJECT<br>'VEIG TYPE'</h1>
+          <li>
+            <ul>Client: Veig.tv</ul>
+            <ul>Year: 2013</ul>
+            <ul>Type: Full HD</ul>
+            <ul>Music: Warrior Concerto<br>(The Glitch Mob)</ul>
+            <ul>-</ul>
+            <ul>Full Story</ul>
+            <ul><a href="bit.ly/19xM9U7">bit.ly/19xM9U7</a></ul>
+          </li>
+
+        </div>
+
+        <div id="controls" class="threed">Play / Pause / Stop</div>
+
+        <!--
+        <div id="overlay" class="threed"></div>
+
+        <div id="logo" class="threed">
+          <img src="logo-mozilla-white.svg">
+
+        </div>
+
+        <div class="loading threed">
+          <div class="rect1 threed"></div>
+          <div class="rect2 threed"></div>
+          <div class="rect3 threed"></div>
+          <div class="rect4 threed"></div>
+          <div class="rect5 threed"></div>
+        </div>
+
+        -->
+
+      	<!--
+        <div id="anim1" class="threed">
+      	  <div id="text1" class="threed pane">Hello WebVR<br>Hit space for HUD<br>Arrows to move<br>Enter to select</div>
+      	</div>
+        -->
+
+      </div>
+
+    </div>
+  </div>
+
+  <div id="fsbutton"><button onclick="goFullscreen()">Fullscreen</button></div>
+</body>
+</html>
